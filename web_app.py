@@ -180,7 +180,7 @@ if __name__ == '__main__':
 
 
 
-    def transform_image_bytes(file_bytes, pin):
+def transform_image_bytes(file_bytes, pin):
     """
     Applies a symmetrical XOR binary stream cipher to the image byte array 
     using a mathematical mask key derived from the user's 4-digit PIN.
@@ -194,6 +194,7 @@ if __name__ == '__main__':
         byte_array[i] ^= xor_key
         
     return bytes(byte_array)
+
 
 @app.route('/image-crypto', methods=['GET', 'POST'])
 def image_crypto():
@@ -226,8 +227,6 @@ def image_crypto():
             else:
                 out_filename = f"decrypted_{original_name}"
 
-        # Note: If your app uses a different variable name for your uploads folder,
-        # change UPLOAD_FOLDER below to match your existing configuration name.
         out_path = os.path.join(UPLOAD_FOLDER, out_filename)
         with open(out_path, 'wb') as f:
             f.write(processed_bytes)
@@ -235,8 +234,3 @@ def image_crypto():
         return send_file(out_path, as_attachment=True, download_name=out_filename)
 
     return render_template('image_crypto.html')
-
-
-
-
-   
