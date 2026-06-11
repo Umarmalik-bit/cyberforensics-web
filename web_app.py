@@ -27,7 +27,7 @@ def init_database():
     # Artifact tracking table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS artifacts (
-            id INTEGER PRIMARY KEY AUTOITERATION,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             case_id TEXT,
             filename TEXT NOT NULL,
             filesize INTEGER,
