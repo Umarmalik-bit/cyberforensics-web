@@ -1,184 +1,50 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 import os
-import re
-from datetime import datetime
-import analyzer
+import sqlite3
+from flask import Flask, render_template, request, flash, redirect, url_for, send_file, session
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = "SSUET_METRIC_SECRET_KEY_POLYMORPHIC" # Required to maintain secure sessions
+app.secret_key = 'cyberforensics_secure_session_token_key'
 
-# Core User Security Registry Engine Matrix
-# Simulating a multi-tenant environment with automated tracking state variables
-USERS_DB = {}
+# Application Directory Configurations
+UPLOAD_FOLDER = 'uploads'
+DATABASE_FILE = 'forensics_workspace.db'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-def evaluate_password_strength(password):
-    """Calculates password structural strength complexity."""
-    if len(password) < 6:
-        return "Weak"
-    # Strong if it contains numbers, uppercase letters, and special symbols
-    if (re.search(r"\d", password) and 
-        re.search(r"[A-Z]", password) and 
-        re.search(r"[ !@#$%^&*(),.?\":{}|<>_]", password)):
-        return "Strong"
-    return "Normal"
+def init_database():
+    """Initializes the relational database schema for tracking cases and artifacts."""
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    # Case Management Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS cases (
+            case_id TEXT PRIMARY KEY,
+            case_name TEXT NOT NULL,
+            suspect_name TEXT,
+            investigator TEXT NOT NULL
+        )
+    ''')
+    # Artifact tracking table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS artifacts (
+            id INTEGER PRIMARY KEY AUTOITERATION,
+            case_id TEXT,
+            filename TEXT NOT NULL,
+            filesize INTEGER,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(case_id) REFERENCES cases(case_id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
-@app.route('/')
-def root():
-    if 'username' in session:
-        return redirect(url_for('dashboard_view'))
-    return redirect(url_for('login_page'))
-
-@app.route('/login')
-def login_page():
-    return render_template('login.html')
-
-@app.route('/api/auth/register', methods=['POST'])
-def handle_register():
-    username = request.form.get('username', '').strip()
-    password = request.form.get('password', '')
-    
-    if not username or not password:
-        return jsonify({"success": False, "error": "Fields cannot be blank."})
-        
-    if username in USERS_DB:
-        return jsonify({"success": False, "error": f"Username '{username}' is already allocated."})
-        
-    strength = evaluate_password_strength(password)
-    
-    # Initialize separate, distinct virtual vault memory pools for this specific user profile
-    USERS_DB[username] = {
-        "password": password,
-        "failed_attempts": 0,
-        "CASE_DB": [],
-        "EVIDENCE_DB": []
-    }
-    
-    return jsonify({"success": True, "strength": strength})
-
-@app.route('/api/auth/login', methods=['POST'])
-def handle_login():
-    username = request.form.get('username', '').strip()
-    password = request.form.get('password', '')
-    
-    if username not in USERS_DB:
-        return jsonify({"success": False, "error": "Identity signature not registered."})
-        
-    user_profile = USERS_DB[username]
-    
-    if user_profile["password"] == password:
-        # Reset counters on clean verification authentication instance
-        user_profile["failed_attempts"] = 0
-        session['username'] = username
-        return jsonify({"success": True, "redirect": url_for('dashboard_view')})
-    else:
-        user_profile["failed_attempts"] += 1
-        remaining = 3 - user_profile["failed_attempts"]
-        
-        # --- TRIGGER ANTI-FORENSIC SELF DESTRUCT WIPE PROTOCOL ---
-        if user_profile["failed_attempts"] >= 3:
-            del USERS_DB[username] # Complete extraction purge from address registries mapping matrices
-            if 'username' in session and session['username'] == username:
-                session.pop('username', None)
-            return jsonify({
-                "success": False, 
-                "error": "CRITICAL THREAT ALERT: 3 Failed attempts logged consecutively. Account tracking signature has been permanently terminated and vault arrays completely purged!"
-            })
-            
-        return jsonify({
-            "success": False, 
-            "error": f"Invalid passphrase token value signature. Consecutive Threshold Breach Alert: Account self-destruct sequence triggers in {remaining} more attempt(s)."
-        })
-
-@app.route('/logout')
-def handle_logout():
-    session.pop('username', None)
-    return redirect(url_for('login_page'))
-
-# ==================================================================================
-# MULTI-TENANT WORKSPACE ROUTING OVERLAYS (Maps Global logic arrays to Active Session Users)
-# ==================================================================================
-@app.route('/dashboard')
-def dashboard_view():
-    if 'username' not in session: return redirect(url_for('login_page'))
-    u = session['username']
-    return render_template('dashboard.html', 
-                           case_count=len(USERS_DB[u]["CASE_DB"]), 
-                           evidence_count=len(USERS_DB[u]["EVIDENCE_DB"]))
-
-@app.route('/api/case/add', methods=['POST'])
-def add_case():
-    if 'username' not in session: return jsonify({"success": False})
-    u = session['username']
-    case_id = request.form.get('case_id')
-    description = request.form.get('description')
-    if case_id and description:
-        entry = f"ID: {case_id} | Type: {description}"
-        USERS_DB[u]["CASE_DB"].append(entry)
-        return jsonify({"success": True, "entry": entry, "count": len(USERS_DB[u]["CASE_DB"])})
-    return jsonify({"success": False})
-
-@app.route('/api/evidence/upload', methods=['POST'])
-def upload_evidence():
-    if 'username' not in session: return jsonify({"success": False})
-    u = session['username']
-    if 'file' not in request.files: return jsonify({"success": False})
-    file = request.files['file']
-    
-    tag = "SUSPICIOUS" if file.filename.endswith(('.exe', '.bat', '.sh', '.png')) else "SAFE"
-    entry = f"File: {file.filename} -> TAG: [{tag}]"
-    USERS_DB[u]["EVIDENCE_DB"].append(entry)
-    return jsonify({"success": True, "entry": entry, "count": len(USERS_DB[u]["EVIDENCE_DB"])})
-
-@app.route('/api/analyze/file', methods=['POST'])
-def analyze_file():
-    if 'file' not in request.files: return jsonify({"error": "No file"})
-    file = request.files['file']
-    file_path = os.path.join(os.getcwd(), file.filename)
-    file.save(file_path)
-    result = analyzer.analyze_file_integrity(file_path)
-    try: os.remove(file_path) # Clean staging buffer space directly right after mapping parse routines
-    except: pass
-    return jsonify(result)
-
-@app.route('/api/analyze/logs', methods=['POST'])
-def analyze_logs():
-    return jsonify({"report": analyzer.parse_forensic_logs(request.form.get('logs', ''))})
-
-@app.route('/api/decrypt/stego', methods=['POST'])
-def decrypt_stego():
-    user_id = request.form.get('user_id')
-    file = request.files['file']
-    file_path = os.path.join(os.getcwd(), file.filename)
-    file.save(file_path)
-    
-    meta = analyzer.get_id_parameters(user_id)
-    if not meta: return jsonify({"error": f"ACCESS DENIED: Token key invalid."})
-    msg = analyzer.extract_hidden_message(file_path, meta['channel'], meta['bit'])
-    try: os.remove(file_path)
-    except: pass
-    
-    return jsonify({"report": f"AUTHENTICATION CONFIRMED: Profile Clearance Verified -> {meta['name']}\n======================================================================\n-> Payload String: \" {msg} \""})
-
-@app.route('/api/report/compile', methods=['GET'])
-def compile_report():
-    if 'username' not in session: return jsonify({"report": ""})
-    u = session['username']
-    rep = f"CYBERFORENSICS WORKSTATION LIVE DATA CAPTURE REPORT MAPPING\n"
-    rep += "="*75 + "\n"
-    rep += f"Active Operational Profiler Entity Target : User account session [{u.upper()}]\n"
-    rep += f"Compiled Timeline Sequence Instance : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-    rep += "="*75 + "\n\n"
-    rep += "[SECTION I: CASES REGISTRY DIRECTORY]\n"
-    for c in USERS_DB[u]["CASE_DB"]: rep += f" - {c}\n"
-    rep += "\n[SECTION II: SECURE VAULT CONTAINER MANIFEST]\n"
-    for e in USERS_DB[u]["EVIDENCE_DB"]: rep += f" - {e}\n"
-    return jsonify({"report": rep})
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+# Initialize database on startup
+init_database()
 
 
-
+# =========================================================================
+# HELPER FUNCTIONS & CRYPTO ENGINES
+# =========================================================================
 
 def transform_image_bytes(file_bytes, pin):
     """
@@ -188,7 +54,7 @@ def transform_image_bytes(file_bytes, pin):
     pin_int = int(pin)
     pin_seed = sum(int(char) for char in str(pin)) + pin_int
     byte_array = bytearray(file_bytes)
-    xor_key = (pin_seed % 254) + 1  
+    xor_key = (pin_seed % 254) + 1  # Ensure key is non-zero (1-255)
     
     for i in range(len(byte_array)):
         byte_array[i] ^= xor_key
@@ -196,10 +62,164 @@ def transform_image_bytes(file_bytes, pin):
     return bytes(byte_array)
 
 
+# =========================================================================
+# SYSTEM APPLICATION ROUTES (MODULES 1 - 7)
+# =========================================================================
+
+@app.route('/')
+@app.route('/dashboard')
+def dashboard_view():
+    """Renders the main system operations tracking cockpit."""
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM cases")
+        total_cases = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM artifacts")
+        total_artifacts = cursor.fetchone()[0]
+        conn.close()
+    except Exception:
+        total_cases, total_artifacts = 0, 0
+
+    # Ensure dashboard renders metrics properly without line 105 crash loops
+    return render_template('dashboard.html', total_cases=total_cases, total_artifacts=total_artifacts)
+
+
+@app.route('/case-manager', methods=['GET', 'POST'])
+def case_manager():
+    """Module 1 & 3: Case Management Lifecycle Registrations Node"""
+    if request.method == 'POST':
+        case_id = request.form.get('case_id')
+        case_name = request.form.get('case_name')
+        suspect = request.form.get('suspect_name')
+        investigator = request.form.get('investigator_name')
+        
+        if not case_id or not case_name:
+            flash("Validation Fault: Case ID and Title fields are mandatory.", "danger")
+            return redirect(url_for('case_manager'))
+            
+        try:
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO cases (case_id, case_name, suspect_name, investigator) VALUES (?, ?, ?, ?)",
+                           (case_id, case_name, suspect, investigator))
+            conn.commit()
+            conn.close()
+            flash(f"Success: Forensic Case {case_id} registered into registry index.", "success")
+        except sqlite3.IntegrityError:
+            flash("Database Conflict: This Case ID already exists within the ledger.", "danger")
+            
+        return redirect(url_for('case_manager'))
+
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cases")
+    all_cases = cursor.fetchall()
+    conn.close()
+    return render_template('case_manager.html', cases=all_cases)
+
+
+@app.route('/evidence-collector', methods=['GET', 'POST'])
+def evidence_collector():
+    """Module 2 & 4: Secure Evidence Artifacts Preservation Node"""
+    if request.method == 'POST':
+        case_id = request.form.get('case_id')
+        file = request.files.get('evidence_file')
+        
+        if not file or file.filename == '':
+            flash("Ingestion Fault: No artifact payload selected.", "danger")
+            return redirect(request.url)
+            
+        filename = secure_filename(file.filename)
+        save_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(save_path)
+        
+        filesize = os.path.getsize(save_path)
+        
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO artifacts (case_id, filename, filesize) VALUES (?, ?, ?)",
+                       (case_id, filename, filesize))
+        conn.commit()
+        conn.close()
+        
+        flash(f"Artifact '{filename}' successfully archived and bound to Case ID: {case_id}", "success")
+        return redirect(url_for('evidence_collector'))
+
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM artifacts")
+    all_artifacts = cursor.fetchall()
+    conn.close()
+    return render_template('evidence_collector.html', artifacts=all_artifacts)
+
+
+@app.route('/threat-scanner', methods=['GET', 'POST'])
+def threat_scanner():
+    """Module 5: File Malicious Threat Signature Integrity Compliance Scan"""
+    scan_results = None
+    if request.method == 'POST':
+        file = request.files.get('suspect_file')
+        if file:
+            filename = file.filename
+            file_bytes = file.read()
+            verdict = "COMPLIANT / SAFE"
+            flags = []
+            
+            # 1. Double Extension Threat Check
+            if filename.count('.') > 1:
+                verdict = "MALICIOUS / THREAT FLAG"
+                flags.append("Deceptive Obfuscation: Double extension detected.")
+                
+            # 2. Signature Script Injections Parsing
+            malicious_signatures = [b"eval(", b"exec(", b"base64_decode", b"<script>", b"DROP TABLE"]
+            for signature in malicious_signatures:
+                if signature in file_bytes:
+                    verdict = "MALICIOUS / THREAT FLAG"
+                    flags.append(f"Malicious Signature Match: Found unsafe binary signature {signature.decode('utf-8', errors='ignore')}")
+            
+            scan_results = {
+                'filename': filename,
+                'verdict': verdict,
+                'flags': flags if flags else ["No anomalies detected during bytecode analysis."]
+            }
+            
+    return render_template('threat_scanner.html', results=scan_results)
+
+
+@app.route('/timeline-parser', methods=['GET', 'POST'])
+def timeline_parser():
+    """Module 6: Incident Timeline Log Behavior Pattern Parser Engine"""
+    parsed_logs = []
+    brute_force_ips = {}
+    
+    if request.method == 'POST':
+        file = request.files.get('log_file')
+        if file:
+            lines = file.read().decode('utf-8').splitlines()
+            for line in lines:
+                if "Failed password" in line or "Authentication Failure" in line:
+                    parts = line.split()
+                    # Mock extraction pattern matching for common log arrays
+                    ip_address = parts[-4] if len(parts) >= 4 else "Unknown IP"
+                    timestamp = " ".join(parts[0:3]) if len(parts) >= 3 else "Unknown Time"
+                    
+                    parsed_logs.append({
+                        'timestamp': timestamp,
+                        'ip': ip_address,
+                        'event': "Failed Authentication Attempt"
+                    })
+                    brute_force_ips[ip_address] = brute_force_ips.get(ip_address, 0) + 1
+                    
+    return render_template('timeline_parser.html', logs=parsed_logs, suspicious_ips=brute_force_ips)
+
+
 @app.route('/image-crypto', methods=['GET', 'POST'])
 def image_crypto():
+    """Module 7: Secure Image Binary Encryption Matrix Node"""
     if request.method == 'POST':
-        action = request.form.get('action')  
+        action = request.form.get('action')  # Expected: 'encrypt' or 'decrypt'
         pin = request.form.get('pin')
         file = request.files.get('image_file')
 
@@ -234,3 +254,12 @@ def image_crypto():
         return send_file(out_path, as_attachment=True, download_name=out_filename)
 
     return render_template('image_crypto.html')
+
+
+# =========================================================================
+# APPLICATION ENTRY CONTROL POINT
+# =========================================================================
+
+if __name__ == '__main__':
+    # Configured for dynamic server environment scaling
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
