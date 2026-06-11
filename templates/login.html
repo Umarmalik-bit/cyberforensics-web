@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Vault Authentication Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-8 rounded-xl shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-xl font-mono tracking-widest text-blue-500 font-bold">SECURE PORTAL PORT BUFFER GATE</h1>
+            <p class="text-xs text-slate-500 font-mono mt-1">Identity Gatekeeper System Validation Protocols</p>
+        </div>
+
+        <div id="auth-alert" class="hidden text-xs font-mono p-3 mb-6 rounded border bg-slate-950 whitespace-pre-wrap"></div>
+
+        <div class="space-y-6">
+            <div>
+                <label class="block text-xs font-mono tracking-wider uppercase text-slate-400 mb-2">Operator Username Identification Signature:</label>
+                <input type="text" id="username" class="w-full bg-slate-950 border border-slate-700 rounded p-3 text-sm focus:outline-none focus:border-blue-500 font-mono text-slate-100">
+            </div>
+
+            <div>
+                <label class="block text-xs font-mono tracking-wider uppercase text-slate-400 mb-2">Cryptographic Verification Passphrase Sequence:</label>
+                <input type="password" id="password" onkeyup="checkPasswordStrengthLive(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded p-3 text-sm focus:outline-none focus:border-blue-500 font-mono text-slate-100">
+                
+                <div id="strength-meter-container" class="hidden mt-2">
+                    <div class="text-[10px] font-mono uppercase text-slate-500">Passphrase Metrics Evaluation Assessment: 
+                        <span id="strength-label" class="font-bold">Weak</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-1 rounded mt-1 overflow-hidden">
+                        <div id="strength-bar" class="w-1/3 bg-red-500 h-full transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 pt-2">
+                <button onclick="triggerLogin()" class="bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold py-3 px-4 rounded text-xs tracking-wider uppercase transition shadow-md">Verify Access</button>
+                <button onclick="triggerRegistration()" class="border border-slate-700 hover:border-slate-500 text-slate-400 font-mono font-bold py-3 px-4 rounded text-xs tracking-wider uppercase transition">Provision User</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkPasswordStrengthLive(val) {
+            let container = document.getElementById('strength-meter-container');
+            let label = document.getElementById('strength-label');
+            let bar = document.getElementById('strength-bar');
+
+            if(val.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+            container.classList.remove('hidden');
+
+            if(val.length < 6) {
+                label.innerText = "WEAK SECURITY DEPTH";
+                label.className = "text-red-500 font-bold";
+                bar.style.width = "33%";
+                bar.className = "h-full bg-red-500 transition-all";
+            } else if (/\d/.test(val) && /[A-Z]/.test(val) && /[ !@#$%^&*(),.?":{}|<>_]/.test(val)) {
+                label.innerText = "STRONG HARDENED ARCHITECTURE";
+                label.className = "text-emerald-400 font-bold";
+                bar.style.width = "100%";
+                bar.className = "h-full bg-emerald-500 transition-all";
+            } else {
+                label.innerText = "NORMAL STANDARDIZED LEVEL";
+                label.className = "text-amber-500 font-bold";
+                bar.style.width = "66%";
+                bar.className = "h-full bg-amber-500 transition-all";
+            }
+        }
+
+        function displayAlert(msg, type) {
+            let alertBox = document.getElementById('auth-alert');
+            alertBox.classList.remove('hidden', 'border-red-900', 'text-red-400', 'border-emerald-900', 'text-emerald-400', 'border-amber-900', 'text-amber-400');
+            alertBox.innerText = msg;
+            
+            if(type === 'error') alertBox.classList.add('border-red-900', 'text-red-400');
+            if(type === 'success') alertBox.classList.add('border-emerald-900', 'text-emerald-400');
+            if(type === 'warn') alertBox.classList.add('border-amber-900', 'text-amber-400');
+        }
+
+        function triggerLogin() {
+            let formData = new FormData();
+            formData.append('username', document.getElementById('username').value);
+            formData.append('password', document.getElementById('password').value);
+
+            fetch('/api/auth/login', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    displayAlert("Access authorized code clear. Initializing workspace layout mapping links...", "success");
+                    setTimeout(() => { window.location.href = data.redirect; }, 1000);
+                } else {
+                    displayAlert(data.error, "error");
+                }
+            });
+        }
+
+        function triggerRegistration() {
+            let formData = new FormData();
+            formData.append('username', document.getElementById('username').value);
+            formData.append('password', document.getElementById('password').value);
+
+            fetch('/api/auth/register', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    displayAlert(`[ACCOUNT MANIFEST CREATED SUCCESSFULLY]\nProfile Operational Security Complexity Metric: ${data.strength.toUpperCase()}`, "success");
+                } else {
+                    displayAlert(data.error, "warn");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

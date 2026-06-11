@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberForensics Lab Workstation Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased">
+
+    <header class="bg-slate-950 border-b border-slate-800 px-8 py-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-xl font-extrabold tracking-wider text-blue-500">CYBERFORENSICS WEB LAB WORKSTATION</h1>
+            <p class="text-xs font-mono text-slate-500">SSUET Research System Terminal Engine v3.0</p>
+        </div>
+        <div class="flex gap-6 text-sm font-mono text-slate-400 items-center">
+            <div>Cases Indexed: <span id="stat-cases" class="text-blue-400 font-bold">{{ case_count }}</span></div>
+            <div>Vault Storage: <span id="stat-evidence" class="text-emerald-400 font-bold">{{ evidence_count }}</span></div>
+            <a href="/logout" class="bg-red-950 border border-red-800 text-red-400 rounded px-3 py-1.5 hover:bg-red-900 hover:text-white transition-all font-mono font-bold text-xs tracking-wider uppercase">LOGOUT</a>
+        </div>
+    </header>
+
+    <main class="p-8 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <section class="bg-slate-950 p-6 rounded-lg border border-slate-800 shadow-xl flex flex-col justify-between">
+            <div>
+                <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 border-b border-slate-800 pb-2">Module 1: Case Manager Registry Index</h3>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="case-id" placeholder="Case Ref ID (SSUET-A)" class="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm w-1/3 focus:outline-none focus:border-blue-500 text-slate-100">
+                    <input type="text" id="case-desc" placeholder="Investigation Parameters Summary Narrative" class="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm w-2/3 focus:outline-none focus:border-blue-500 text-slate-100">
+                </div>
+            </div>
+            <button onclick="commitCase()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded text-sm transition">Commit Case Log Entry</button>
+        </section>
+
+        <section class="bg-slate-950 p-6 rounded-lg border border-slate-800 shadow-xl flex flex-col justify-between">
+            <div>
+                <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 border-b border-slate-800 pb-2">Module 2: Secure Evidence Artifacts Collector</h3>
+                <input type="file" id="evidence-file" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-emerald-950 file:text-emerald-400 hover:file:bg-emerald-900 cursor-pointer mb-4">
+            </div>
+            <button onclick="vaultEvidence()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded text-sm transition">Mount File to Storage Vault</button>
+        </section>
+
+        <section class="bg-slate-950 p-6 rounded-lg border border-slate-800 shadow-xl md:col-span-2">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 border-b border-slate-800 pb-2">Module 3: File Malicious Threat Signature Integrity compliance Scan</h3>
+            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-4">
+                <input type="file" id="scan-target" class="block text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-amber-950 file:text-amber-400 hover:file:bg-amber-900 cursor-pointer w-full sm:w-auto">
+                <button onclick="runFileScan()" class="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded text-sm transition whitespace-nowrap">Execute Signature Structural Scan</button>
+            </div>
+            <div id="scan-output" class="bg-slate-900 border border-slate-800 rounded p-4 font-mono text-xs text-amber-500 min-h-[60px] whitespace-pre-wrap">System Integrity Compliance Module Standby. Run verification mapping engine assets vectors...</div>
+        </section>
+
+        <section class="bg-slate-950 p-6 rounded-lg border border-slate-800 shadow-xl md:col-span-2">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 border-b border-slate-800 pb-2">Module 4: Incident Timeline Log Behavior Pattern Parser Engine</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-mono text-slate-500 mb-1">RAW TARGET SYSTEM PACKET STREAM INPUT LOGS BLOCK:</label>
+                    <textarea id="log-input" rows="6" class="w-full bg-slate-900 border border-slate-700 rounded p-3 font-mono text-xs text-slate-300 focus:outline-none focus:border-purple-500 resize-none">2026-06-11 22:15:02 IP 10.0.0.45 Authentication Failed message for user root
+2026-06-11 22:15:05 IP 10.0.0.45 Authentication Failed message for user root
+2026-06-11 22:15:09 IP 10.0.0.45 Authentication Failed message for user root
+2026-06-11 22:15:12 IP 10.0.0.45 Authentication Failed message for user root
+2026-06-11 22:15:15 IP 10.0.0.45 Authentication Failed message for user root
+2026-06-11 22:16:01 IP 192.168.1.100 Session Access Cleared Authorized for admin user</textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-purple-400 mb-1">PARSED FREQUENCY MATRIX DISCOVERY ALERTS OUTPUT FEED:</label>
+                    <div id="log-output" class="w-full bg-slate-900 border border-slate-800 rounded p-3 font-mono text-xs text-purple-400 h-[114px] overflow-y-auto whitespace-pre-wrap">[System Pipeline Standby: Awaiting Timeline Event Parse Call Execution]</div>
+                </div>
+            </div>
+            <button onclick="runLogParse()" class="w-full mt-4 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded text-sm transition">Parse Target System Logs Sequences</button>
+        </section>
+
+        <section class="bg-slate-950 p-6 rounded-lg border border-slate-800 shadow-xl md:col-span-2">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 border-b border-slate-800 pb-2">Module 5: Confidential Unique ID Mapped Steg-Decoder Extraction Panel</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end mb-4">
+                <div class="sm:col-span-1">
+                    <label class="block text-xs font-mono text-slate-500 mb-1">ENTER CONFIDENTIAL ID TOKEN:</label>
+                    <input type="text" id="stego-id" placeholder="e.g. 1122" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-red-500 text-slate-100">
+                </div>
+                <div class="sm:col-span-1">
+                    <label class="block text-xs font-mono text-slate-500 mb-1">MOUNT ENCRYPTED STEGO CARRIER GRAPHIC:</label>
+                    <input type="file" id="stego-file" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-red-950 file:text-red-400 hover:file:bg-red-900 cursor-pointer">
+                </div>
+                <button onclick="runStegoDecrypt()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded text-sm transition whitespace-nowrap">Decrypt Payload Vector Stream</button>
+            </div>
+            <div id="stego-output" class="bg-slate-900 border border-slate-800 rounded p-4 font-mono text-xs text-red-400 min-h-[80px] whitespace-pre-wrap">Decoder Stack Standby. Authenticate Unique user key token variables to engage bit plane routing matrices...</div>
+        </section>
+
+        <section class="bg-slate-950 p-6 rounded-lg border border-slate-800 shadow-xl md:col-span-2 mb-8">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 border-b border-slate-800 pb-2">Module 6: Telemetry Discovery Master Aggregator Report Compiler</h3>
+            <button onclick="compileMasterReport()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded text-sm tracking-wider uppercase transition mb-4">Compile Dynamic Forensic Case Investigation Record Log</button>
+            <textarea id="report-output" rows="10" readonly class="w-full bg-slate-900 border border-slate-800 rounded p-4 font-mono text-xs text-slate-300 focus:outline-none resize-none placeholder-slate-700" placeholder="System Report Builder Empty. Trigger data assembly mapping parameters engine arrays sequence directly above to build output summary field file block..."></textarea>
+        </section>
+
+    </main>
+
+    <script>
+        function commitCase() {
+            let id = document.getElementById('case-id').value;
+            let desc = document.getElementById('case-desc').value;
+            let formData = new FormData();
+            formData.append('case_id', id);
+            formData.append('description', desc);
+
+            fetch('/api/case/add', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    document.getElementById('stat-cases').innerText = data.count;
+                    alert('Forensic Case Log Profile Embedded Securely inside active server heap memory architecture matrices.');
+                    document.getElementById('case-id').value = '';
+                    document.getElementById('case-desc').value = '';
+                }
+            });
+        }
+
+        function vaultEvidence() {
+            let fileInput = document.getElementById('evidence-file');
+            if(fileInput.files.length === 0) return alert('Select target object context binary data file first.');
+            let formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/api/evidence/upload', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    document.getElementById('stat-evidence').innerText = data.count;
+                    alert('Evidentiary data asset metrics securely mapped into file allocation container tracking matrix.');
+                    fileInput.value = '';
+                }
+            });
+        }
+
+        function runFileScan() {
+            let fileInput = document.getElementById('scan-target');
+            if(fileInput.files.length === 0) return alert('Select file target vector footprint asset entry to scan.');
+            let formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/api/analyze/file', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                let text = `FILE INTEGRITY RADAR SCAN LOG DISCOVERY EXTREMITY DETECT REPORT\n========================================================================\n`;
+                text += `-> Object Filename Ident: ${data.filename}\n-> Memory Allocation Apportion Space: ${data.size}\n-> Threat Rating Severity Category: [${data.risk.toUpperCase()}]\n-> Core Structural Engine Diagnosis Vector: ${data.details}`;
+                document.getElementById('scan-output').innerText = text;
+            });
+        }
+
+        function runLogParse() {
+            let logs = document.getElementById('log-input').value;
+            let formData = new FormData();
+            formData.append('logs', logs);
+
+            fetch('/api/analyze/logs', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('log-output').innerText = data.report;
+            });
+        }
+
+        function runStegoDecrypt() {
+            let id = document.getElementById('stego-id').value;
+            let fileInput = document.getElementById('stego-file');
+            if(!id || fileInput.files.length === 0) return alert('Input credentials profile ID token and upload matching visual image target asset canvas structure.');
+            
+            let formData = new FormData();
+            formData.append('user_id', id);
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/api/decrypt/stego', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if(data.error) {
+                    document.getElementById('stego-output').innerText = data.error;
+                } else {
+                    document.getElementById('stego-output').innerText = data.report;
+                }
+            });
+        }
+
+        function compileMasterReport() {
+            fetch('/api/report/compile')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('report-output').value = data.report;
+            });
+        }
+    </script>
+</body>
+</html>
