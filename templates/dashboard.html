@@ -3,56 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberForensics Lab Workstation — Command Cockpit</title>
+    <title>CyberForensics Lab Workstation Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', sans-serif; }
-        .navbar-custom { background-color: #1e293b; border-bottom: 1px solid #334155; }
-        .card-custom { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; margin-bottom: 20px; }
-        .card-header-custom { border-bottom: 1px solid #334155; color: #38bdf8; font-weight: 600; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.5px; padding: 1rem; }
-        .btn-custom { font-weight: 500; font-size: 0.9rem; }
-        .metric-badge { background-color: #0f172a; border: 1px solid #475569; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; color: #38bdf8; }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+        }
+        .navbar-custom {
+            background-color: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding: 10px 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-custom {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .card-header-custom {
+            border-bottom: 1px solid #334155;
+            color: #38bdf8;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            padding: 12px 15px;
+        }
+        .form-control, .form-select {
+            background-color: #0f172a !important;
+            border: 1px solid #475569 !important;
+            color: #ffffff !important;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .form-control::placeholder {
+            color: #64748b !important;
+            font-size: 0.85rem;
+        }
+        .btn-custom {
+            font-weight: 500;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px;
+        }
+        .status-box {
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            color: #38bdf8;
+            min-height: 60px;
+        }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand text-info fw-bold" href="/dashboard">🔬 FORENSIC LAB WORKSTATION</a>
-            <div class="d-flex align-items-center gap-3">
-                <span class="metric-badge">Registered Cases: <strong>{{ total_cases }}</strong></span>
-                <span class="metric-badge">Evidence Items: <strong>{{ total_artifacts }}</strong></span>
-                <a href="/image-crypto" class="btn btn-outline-info btn-sm btn-custom">📸 Image Crypto Node</a>
-                <a href="/logout" class="btn btn-outline-danger btn-sm btn-custom">Secure Logout</a>
-            </div>
+    <div class="navbar-custom">
+        <div class="fw-bold text-info">🔬 CYBERFORENSICS WORKSTATION CONSOLE</div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-dark border border-secondary text-info p-2">Active Sessions: {{ session.get('user') }}</span>
+            <a href="/logout" class="btn btn-outline-danger btn-sm">Secure Logout</a>
         </div>
-    </nav>
+    </div>
 
-    <div class="container px-4">
+    <div class="container-fluid">
+        
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
+                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} py-2 small mb-4" role="alert">
                         {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
         <div class="row">
+            
             <div class="col-md-6">
                 <div class="card card-custom">
-                    <div class="card-header-custom">Module 3: Case Manager Registry Index</div>
+                    <div class="card-header-custom">MODULE 1: CASE MANAGER REGISTRY INDEX</div>
                     <div class="card-body">
                         <form action="/case-manager" method="POST">
                             <div class="row g-2 mb-3">
-                                <div class="col"><input type="text" name="case_id" class="form-control bg-dark text-white border-secondary" placeholder="Case Ref ID (e.g., CR-001)" required></div>
-                                <div class="col"><input type="text" name="case_name" class="form-control bg-dark text-white border-secondary" placeholder="Investigation Title" required></div>
+                                <div class="col">
+                                    <input type="text" name="case_id" class="form-control" placeholder="Case Ref ID (SSLET-A)" required>
+                                </div>
+                                <div class="col">
+                                    <input type="text" name="case_name" class="form-control" placeholder="Investigation Parameter Summary Narrative" required>
+                                </div>
                             </div>
-                            <div class="row g-2 mb-3">
-                                <div class="col"><input type="text" name="suspect_name" class="form-control bg-dark text-white border-secondary" placeholder="Suspect Name"></div>
-                                <div class="col"><input type="text" name="investigator_name" class="form-control bg-dark text-white border-secondary" placeholder="Lead Investigator" required></div>
+                            <div class="row g-2 mb-3 d-none">
+                                <input type="hidden" name="suspect_name" value="Unknown">
+                                <input type="hidden" name="investigator_name" value="{{ session.get('user') }}">
                             </div>
                             <button type="submit" class="btn btn-primary w-100 btn-custom">Commit Case Log Entry</button>
                         </form>
@@ -62,12 +118,18 @@
 
             <div class="col-md-6">
                 <div class="card card-custom">
-                    <div class="card-header-custom">Module 4: Secure Evidence Artifacts Collector</div>
+                    <div class="card-header-custom">MODULE 2: SECURE EVIDENCE ARTIFACTS COLLECTOR</div>
                     <div class="card-body">
                         <form action="/evidence-collector" method="POST" enctype="multipart/form-data">
-                            <div class="mb-3"><input type="text" name="case_id" class="form-control bg-dark text-white border-secondary" placeholder="Target Case Association ID" required></div>
-                            <div class="mb-3"><input type="file" name="evidence_file" class="form-control bg-dark text-white border-secondary" required></div>
-                            <button type="submit" class="btn btn-success w-100 btn-custom">Mount File to Storage Vault</button>
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-4">
+                                    <input type="text" name="case_id" class="form-control" placeholder="Case Ref ID Match" required>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="file" name="evidence_file" class="form-control" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 btn-custom" style="background-color: #059669; border: none;">Mount File to Storage Vault</button>
                         </form>
                     </div>
                 </div>
@@ -75,13 +137,16 @@
 
             <div class="col-12">
                 <div class="card card-custom">
-                    <div class="card-header-custom">Module 5: File Malicious Threat Signature Integrity Compliance Scan</div>
+                    <div class="card-header-custom">MODULE 3: FILE MALICIOUS THREAT SIGNATURE INTEGRITY COMPLIANCE SCAN</div>
                     <div class="card-body">
                         <form action="/threat-scanner" method="POST" enctype="multipart/form-data">
-                            <div class="input-group mb-3">
-                                <input type="file" name="suspect_file" class="form-control bg-dark text-white border-secondary" required>
-                                <button type="submit" class="btn btn-warning btn-custom text-dark fw-bold">Execute Signature Structural Scan</button>
+                            <div class="mb-3">
+                                <input type="file" name="suspect_file" class="form-control" required>
                             </div>
+                            <div class="status-box mb-3">
+                                System Integrity Compliance Module Standby. Run verification mapping engine assets vectors...
+                            </div>
+                            <button type="submit" class="btn btn-warning w-100 btn-custom text-dark fw-bold" style="background-color: #d97706; border: none;">Execute Signature Structural Scan</button>
                         </form>
                     </div>
                 </div>
@@ -89,18 +154,82 @@
 
             <div class="col-12">
                 <div class="card card-custom">
-                    <div class="card-header-custom">Module 6: Incident Timeline Log Behavior Pattern Parser Engine</div>
+                    <div class="card-header-custom">MODULE 4: INCIDENT TIMELINE LOG BEHAVIOR PATTERN PARSER ENGINE</div>
                     <div class="card-body">
                         <form action="/timeline-parser" method="POST" enctype="multipart/form-data">
-                            <div class="mb-3">
-                                <label class="form-label text-secondary small">Upload Raw Target System Packet/Auth Log Block:</label>
-                                <input type="file" name="log_file" class="form-control bg-dark text-white border-secondary" required>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small text-secondary">RAW TARGET SYSTEM PACKET STREAM INPUT LOG BLOCK:</label>
+                                    <textarea class="form-control" rows="4" readonly placeholder="2026-06-12 22:15:02 TR 10.0.0.45 Authentication Failed message for user root&#10;2026-06-12 22:15:05 TR 10.0.0.45 Authentication Failed message for user root"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-secondary">PARSED FREQUENCY MATRIX DISCOVERY ALERTS OUTPUT FEED:</label>
+                                    <div class="status-box" style="height: 108px; overflow-y: auto;">
+                                        [System Pipeline Standby Awaiting Timeline Event Parse Call Execution]
+                                    </div>
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-purple w-100 btn-custom btn-secondary">Parse Target System Log Sequences</button>
+                            <div class="mb-3">
+                                <label class="form-label small text-secondary">Select Log File Source to Parse:</label>
+                                <input type="file" name="log_file" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-purple w-100 btn-custom btn-secondary" style="background-color: #7c3aed; border: none;">Parse Target System Log Sequences</button>
                         </form>
                     </div>
                 </div>
             </div>
+
+            <div class="col-12">
+                <div class="card card-custom">
+                    <div class="card-header-custom">MODULE 5: CONFIDENTIAL UNIQUE ID MAPPED STEG-DECODER EXTRACTION PANEL</div>
+                    <div class="card-body">
+                        <form action="/steg-decode" method="POST" enctype="multipart/form-data">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small text-secondary">ENTER CONFIDENTIAL TO TOKEN:</label>
+                                    <input type="text" class="form-control" placeholder="e.g. 1122">
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label small text-secondary">MOUNT ENCRYPTED STEGO CARRIER GRAPHIC:</label>
+                                    <input type="file" name="stego_image" class="form-control">
+                                </div>
+                            </div>
+                            <div class="status-box mb-3">
+                                Decoder Stack Standby. Authenticate unique user key token variables to engage bit plane routing matrices...
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100 btn-custom" style="background-color: #dc2626; border: none;">Decrypt Payload Vector Streams</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card card-custom">
+                    <div class="card-header-custom">MODULE 6: TELEMETRY DISCOVERY MASTER AGGREGATOR REPORT COMPILER & BITWISE IMAGE CRYPTO</div>
+                    <div class="card-body">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6 border-end border-secondary pe-3">
+                                <h6 class="text-info small fw-bold mb-2">PART A: SUMMARY INTEGRITY METRICS</h6>
+                                <div class="p-2 bg-dark rounded mb-2 small">Total Registered Database Cases: <strong class="text-warning">{{ total_cases }}</strong></div>
+                                <div class="p-2 bg-dark rounded small">Total Tracked Vault Artifacts: <strong class="text-warning">{{ total_artifacts }}</strong></div>
+                            </div>
+                            <div class="col-md-6 ps-3">
+                                <h6 class="text-info small fw-bold mb-2">PART B: IMAGE CRYPTOGRAPHIC LAYER</h6>
+                                <form action="/image-crypto" method="POST" enctype="multipart/form-data">
+                                    <input type="file" name="image_file" class="form-control mb-2" required>
+                                    <input type="password" name="pin" class="form-control mb-2" maxlength="4" pattern="\d{4}" placeholder="4-Digit PIN Key (e.g. 1234)" required>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" name="action" value="encrypt" class="btn btn-danger btn-sm w-50">Encrypt Image</button>
+                                        <button type="submit" name="action" value="decrypt" class="btn btn-info btn-sm w-50 text-dark">Decrypt Image</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-100 btn-custom" style="background-color: #6366f1; border: none;">Compile Dynamic Forensic Case Investigation Record Log</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
