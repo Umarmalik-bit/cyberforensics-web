@@ -3,68 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberForensics Station Gateway</title>
+    <title>Workstation Authorization Gateway</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .login-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 100%; max-width: 480px; padding: 2.5rem; }
-        .brand-title { color: #38bdf8; font-size: 1.5rem; font-weight: 700; text-align: center; text-transform: uppercase; margin-bottom: 1.5rem; border-bottom: 2px solid #334155; padding-bottom: 10px; }
-        .form-control { background-color: #0f172a; border: 1px solid #475569; color: #ffffff; margin-bottom: 1rem; }
-        .form-control:focus { background-color: #0f172a; border-color: #38bdf8; color: #ffffff; box-shadow: none; }
-        .btn-action { font-weight: 600; padding: 0.6rem; }
-        .nav-tabs .nav-link { color: #94a3b8; border: none; font-weight: 500; }
-        .nav-tabs .nav-link.active { background-color: transparent; color: #38bdf8; border-bottom: 2px solid #38bdf8; }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .auth-container {
+            width: 100%;
+            max-width: 440px;
+            padding: 15px;
+        }
+        .auth-card {
+            background-color: #0b1329;
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .module-badge {
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #00d2ff;
+            border: 1px solid #00d2ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        .form-control {
+            background-color: #090f1f !important;
+            border: 1px solid #1e293b !important;
+            color: #ffffff !important;
+            font-size: 0.95rem;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .form-control:focus {
+            border-color: #00d2ff !important;
+            box-shadow: 0 0 0 1px #00d2ff !important;
+        }
+        .btn-auth {
+            background-color: #0284c7 !important;
+            border: none;
+            font-weight: bold;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 11px;
+            width: 100%;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .btn-auth:hover {
+            background-color: #0369a1 !important;
+        }
+        .section-divider {
+            border-top: 1px dashed #1e293b;
+            margin: 25px 0;
+            position: relative;
+            text-align: center;
+        }
+        .section-divider span {
+            background-color: #0b1329;
+            padding: 0 10px;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: bold;
+            position: relative;
+            top: -10px;
+            text-transform: uppercase;
+        }
+        .security-notice {
+            background-color: #040814;
+            border: 1px solid #3b0712;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #ef4444;
+        }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <div class="brand-title">Forensic Workstation Access</div>
+    <div class="auth-container">
+        <div class="text-center mb-4">
+            <h3 class="mb-1" style="font-weight: 700; color: #00d2ff; letter-spacing: -0.5px;">FORENSIC WORKSTATION</h3>
+            <small class="text-secondary text-uppercase tracking-wider font-monospace" style="font-size: 0.75rem;">Central Security Access Gateway</small>
+        </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-sm py-2 text-center mb-3" role="alert">
-                        {{ message }}
+                {% for category, msg in messages %}
+                    <div class="alert alert-{{ category }} small py-2 mb-3 shadow-sm border-0 text-center" role="alert">
+                        {{ msg }}
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <ul class="nav nav-tabs justify-content-center mb-4" id="authTabs" role="tablist">
-            <li class="nav-item">
-                <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#loginPanel" type="button" role="tab">Workstation Sign In</button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#registerPanel" type="button" role="tab">Create Account</button>
-            </li>
-        </ul>
+        <div class="auth-card">
+            <div class="mb-3 text-start">
+                <span class="module-badge">Module 2: Account Self-Destruct Gateway</span>
+            </div>
+            
+            <form action="/login" method="POST" class="mb-2">
+                <div class="mb-3">
+                    <label class="form-label">Operator Username Identifier:</label>
+                    <input type="text" name="username" class="form-control" autocomplete="off" required placeholder="e.g. analyst_umar">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">System Authentication Session Cipher:</label>
+                    <input type="password" name="password" class="form-control" required placeholder="••••••••">
+                </div>
+                
+                <div class="mb-3 security-notice">
+                    [!] SECURITY POLICY ACTIVE: Entering incorrect session credentials three (3) consecutive times triggers a volatile purge routine that wipes this account record.
+                </div>
 
-        <div class="tab-content" id="authTabsContent">
-            <div class="tab-pane fade show active" id="loginPanel" role="tabpanel">
-                <form action="/login" method="POST">
-                    <label class="form-label small text-secondary">Analyst Username Identity</label>
-                    <input type="text" class="form-control" name="username" required placeholder="Enter assigned keycode">
-                    
-                    <label class="form-label small text-secondary">Workstation Access Password</label>
-                    <input type="password" class="form-control" name="password" required placeholder="••••••••">
-                    
-                    <div class="text-muted small mb-3 text-center">⚠️ Account permanently deletes after 3 wrong tries.</div>
-                    <button type="submit" class="btn btn-primary w-100 btn-action rounded-3">Access Console Environment</button>
-                </form>
+                <button type="submit" class="btn btn-auth mt-1">Mount Station Session</button>
+            </form>
+
+            <div class="section-divider">
+                <span>Identity Provisioning</span>
             </div>
 
-            <div class="tab-pane fade" id="registerPanel" role="tabpanel">
-                <form action="/register" method="POST">
-                    <label class="form-label small text-secondary">Choose New Username Profile</label>
-                    <input type="text" class="form-control" name="username" required placeholder="Choose identity text">
-                    
-                    <label class="form-label small text-secondary">Set Cryptographic Password</label>
-                    <input type="password" class="form-control" name="password" required placeholder="Set strong passphrase">
-                    
-                    <button type="submit" class="btn btn-success w-100 btn-action rounded-3 text-white">Provision New Profile Ledger</button>
-                </form>
+            <div class="mb-2 text-start">
+                <span class="module-badge" style="color: #a78bfa; border-color: #7c3aed;">Module 1: Identity Profile Provisioning Node</span>
             </div>
+
+            <form action="/register" method="POST">
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label small text-secondary">Assign Token User:</label>
+                        <input type="text" name="username" class="form-control form-control-sm" placeholder="Username" autocomplete="off" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-secondary">Assign Pass Cipher:</label>
+                        <input type="password" name="password" class="form-control form-control-sm" placeholder="Password" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-sm btn-outline-secondary w-100 text-uppercase py-2" style="font-size: 0.75rem; font-weight: 600; border-color: #334155; color: #94a3b8;">Provision Credentials Ledger</button>
+            </form>
         </div>
     </div>
 
