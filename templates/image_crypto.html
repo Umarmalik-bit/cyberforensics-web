@@ -3,51 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Cryptographic Transformation Node</title>
+    <title>Cryptographic Layer Processing Terminal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', sans-serif; }
-        .card-custom { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; }
-        .card-header-custom { border-bottom: 1px solid #334155; color: #38bdf8; font-weight: 600; text-transform: uppercase; font-size: 0.9rem; padding: 1rem; }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 30px;
+        }
+        .main-header {
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .crypto-card {
+            background-color: #0b1329;
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+        .module-header {
+            color: #00d2ff;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            margin-bottom: 18px;
+            border-left: 3px solid #00d2ff;
+            padding-left: 10px;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #94a3b8;
+        }
+        .form-control {
+            background-color: #090f1f !important;
+            border: 1px solid #1e293b !important;
+            color: #ffffff !important;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .form-control:focus {
+            border-color: #00d2ff !important;
+            box-shadow: 0 0 0 1px #00d2ff !important;
+        }
+        .btn-action {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 4px;
+            padding: 11px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        .terminal-box {
+            background-color: #040814;
+            border: 1px solid #1e293b;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 border-bottom border-secondary">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand text-info fw-bold" href="/dashboard">⬅️ BACK TO COCKPIT</a>
-            <span class="navbar-text text-warning fw-bold">MODULE 8: SYMMETRICAL DATA MATRIX CRYPTO ENGINE</span>
-        </div>
-    </nav>
-
-    <div class="container max-width-md mt-5">
-        <div class="card card-custom">
-            <div class="card-header-custom">Secure Image Cryptographic Symmetrical Masking System</div>
-            <div class="card-body">
-                <form action="/image-crypto" method="POST" enctype="multipart/form-data">
-                    <div class="mb-4">
-                        <label class="form-label text-slate-300">Select Forensic Image Asset Target:</label>
-                        <input type="file" name="image_file" class="form-control bg-dark text-white border-secondary" required>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label text-slate-300">Enter 4-Digit Encryption/Decryption Key PIN:</label>
-                        <input type="password" name="pin" class="form-control bg-dark text-white border-secondary" maxlength="4" pattern="\d{4}" placeholder="e.g., 5729" required>
-                        <div class="form-text text-secondary">The seed PIN is processed utilizing a bitwise symmetrical XOR arithmetic loop sequence.</div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <button type="submit" name="action" value="encrypt" class="btn btn-danger w-100 py-2 fw-bold">Execute Encryption Layer</button>
-                        </div>
-                        <div class="col-6">
-                            <button type="submit" name="action" value="decrypt" class="btn btn-info w-100 py-2 fw-bold text-dark">Reverse Cipher Decryption</button>
-                        </div>
-                    </div>
-                </form>
+    <div class="container" style="max-width: 950px;">
+        <div class="d-flex justify-content-between align-items-center main-header">
+            <div>
+                <h3 class="mb-0" style="font-weight: 600; letter-spacing: -0.5px;">Cryptographic Layer Operations</h3>
+                <small class="text-secondary">Bitwise XOR Stream Transposition & Steganographic Interception Matrix</small>
             </div>
+            <a href="/dashboard" class="btn btn-sm btn-outline-info px-3 py-2" style="border-radius: 4px; font-weight: 500;">← Return to Main Console</a>
+        </div>
+
+        {% if status %}
+        <div class="mb-4">
+            <div class="terminal-box">
+                {% if status == 'success' %}
+                    <span class="text-success">[ SUCCESS ] Matrix bit sequence verification validated. Extraction sequence termination clean.</span><br>
+                    <div class="mt-3 border-top border-dark pt-2">
+                        <strong class="text-secondary d-block mb-1">RECOVERED SECRET PLAINTEXT PAYLOAD STRUCT:</strong>
+                        <span class="text-info bg-black px-2 py-1 d-block border border-dark rounded font-monospace" style="word-break: break-all;">{{ msg_val if msg_val else '[Null empty stream]' }}</span>
+                    </div>
+                {% elif status == 'wrong_pin' %}
+                    <span class="text-danger">[ FAILURE ] Transposition Error: Stream byte sequence extraction failure. Calculated parity signature verification failed (Incorrect PIN structure).</span>
+                {% elif status == 'not_encrypted' %}
+                    <span class="text-warning">[ ANOMALY ] Bypassed: Media standard headers match clean unmodified file types. No payload flags located.</span>
+                {% elif status == 'error' %}
+                    <span class="text-danger">[ PARSING ERROR ] Execution halted. Struct inputs rejected. Seed parameter must match numerical attributes.</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row g-4">
+            
+            <div class="col-md-6">
+                <div class="crypto-card h-100">
+                    <div class="module-header">Module 7: Image Cryptographic Transformation Engine</div>
+                    <form action="/image-crypto" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="encrypt">
+                        
+                        <div class="mb-3">
+                            <label class="form-label small">Select Cover Image File Target:</label>
+                            <input type="file" name="image_file" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small">4-Digit Symmetric Streaming PIN:</label>
+                            <input type="password" name="pin" class="form-control" placeholder="e.g. 4821" maxlength="4" pattern="\d{4}" title="Must be exactly 4 digits" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small">Plaintext Payload String Message Injection:</label>
+                            <textarea name="message" class="form-control" rows="3" placeholder="Input string structures to hide within target files..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-action btn-info w-100 text-white mt-2" style="background-color: #0284c7 !important; border:none;">Inject & Compile Encrypted Payload</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="crypto-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="module-header" style="color: #10b981; border-color: #10b981;">Module 8: Steganography Decoder & Extractor</div>
+                        <form id="decryptForm" action="/image-crypto" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="action" value="decrypt">
+                            
+                            <div class="mb-3">
+                                <label class="form-label small">Load Suspicious Stego Image Object:</label>
+                                <input type="file" name="image_file" class="form-control" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small">4-Digit Geometric Extraction PIN:</label>
+                                <input type="password" name="pin" class="form-control" placeholder="Enter session alignment seed matrix..." maxlength="4" pattern="\d{4}" required>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="pt-4">
+                        <button type="submit" form="decryptForm" class="btn btn-action btn-success w-100" style="background-color: #059669 !important; border:none;">Execute Stream Byte Extraction</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
